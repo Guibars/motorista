@@ -1,0 +1,5 @@
+{
+  "name": "Fotus Charge",
+  "description": "Aplicativo para motoristas de veículos elétricos encontrarem eletropostos, planejarem rotas e gerenciarem recargas.",
+  "requestFramePermissions": ["geolocation"]
+}

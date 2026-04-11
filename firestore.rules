@@ -1,0 +1,107 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    function isAdmin() {
+      return isAuthenticated() && 
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+        (request.auth.token.email == "guilhermebarbosars@gmail.com" && request.auth.token.email_verified == true));
+    }
+
+    function hasOnlyAllowedFields(allowedFields) {
+      return request.resource.data.keys().hasOnly(allowedFields);
+    }
+
+    // ===============================================================
+    // Domain Validators
+    // ===============================================================
+    function isValidUser() {
+      let data = request.resource.data;
+      return hasOnlyAllowedFields(['name', 'email', 'balance', 'role', 'createdAt']) &&
+             data.name is string && data.name.size() > 0 && data.name.size() < 100 &&
+             data.email is string && data.email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$") &&
+             data.balance is number && data.balance >= 0 &&
+             data.role in ['user', 'admin'];
+    }
+
+    function isValidVehicle() {
+      let data = request.resource.data;
+      return hasOnlyAllowedFields(['userId', 'model', 'batteryCapacity', 'currentBattery', 'plugType', 'plate']) &&
+             data.userId is string && data.userId == request.auth.uid &&
+             data.model is string && data.model.size() > 0 && data.model.size() < 100 &&
+             data.batteryCapacity is number && data.batteryCapacity > 0 &&
+             data.currentBattery is number && data.currentBattery >= 0 && data.currentBattery <= 100 &&
+             data.plugType is string && data.plugType.size() > 0 && data.plugType.size() < 50;
+    }
+
+    function isValidSession() {
+      let data = request.resource.data;
+      return hasOnlyAllowedFields(['userId', 'stationId', 'startTime', 'status', 'kwhAdded', 'currentPower', 'cost', 'batteryStart', 'batteryCurrent']) &&
+             data.userId is string && data.userId == request.auth.uid &&
+             data.stationId is string &&
+             data.startTime is string &&
+             data.status in ['active', 'completed'] &&
+             data.kwhAdded is number && data.kwhAdded >= 0 &&
+             data.currentPower is number && data.currentPower >= 0 &&
+             data.cost is number && data.cost >= 0 &&
+             data.batteryStart is number && data.batteryStart >= 0 && data.batteryStart <= 100 &&
+             data.batteryCurrent is number && data.batteryCurrent >= 0 && data.batteryCurrent <= 100;
+    }
+
+    function isValidTransaction() {
+      let data = request.resource.data;
+      return hasOnlyAllowedFields(['userId', 'type', 'amount', 'date', 'title']) &&
+             data.userId is string && data.userId == request.auth.uid &&
+             data.type in ['charge', 'deposit'] &&
+             data.amount is number &&
+             data.date is string &&
+             data.title is string && data.title.size() > 0 && data.title.size() < 200;
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if isAuthenticated() && isOwner(userId) && isValidUser() && request.resource.data.role == 'user';
+      allow update: if isOwner(userId) && isValidUser() && 
+                    (request.resource.data.role == resource.data.role || isAdmin()) &&
+                    (request.resource.data.balance == resource.data.balance || isAdmin());
+    }
+
+    match /vehicles/{vehicleId} {
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow create: if isAuthenticated() && isValidVehicle();
+      allow update: if isAuthenticated() && resource.data.userId == request.auth.uid && isValidVehicle() && request.resource.data.userId == resource.data.userId;
+      allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+    }
+
+    match /stations/{stationId} {
+      allow read: if isAuthenticated();
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /sessions/{sessionId} {
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow create: if isAuthenticated() && isValidSession();
+      allow update: if isAuthenticated() && resource.data.userId == request.auth.uid && isValidSession() && request.resource.data.userId == resource.data.userId;
+    }
+
+    match /transactions/{transactionId} {
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow create: if isAuthenticated() && isValidTransaction();
+      allow update, delete: if false; // Transactions are immutable
+    }
+  }
+}
