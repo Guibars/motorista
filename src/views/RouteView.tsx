@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { MapPin, Navigation, Compass, Battery, Loader2, Zap } from 'lucide-react';
 import { Map, AdvancedMarker, useMap, useMapsLibrary } from '@vis.gl/react-google-maps';
+import { NavigationModal } from '../components/NavigationModal';
 
 interface RouteViewProps {
   onStartNavigation?: () => void;
@@ -12,6 +13,10 @@ export function RouteView({ onStartNavigation }: RouteViewProps) {
   const [isCalculating, setIsCalculating] = useState(false);
   const [route, setRoute] = useState<any>(null);
   const [mapCenter, setMapCenter] = useState({ lat: -23.5505, lng: -46.6333 });
+  
+  // Navigation Modal State
+  const [isNavModalOpen, setIsNavModalOpen] = useState(false);
+  const [navDestination, setNavDestination] = useState<{lat: number, lng: number} | null>(null);
 
   const routesLib = useMapsLibrary('routes');
   const map = useMap();
@@ -86,13 +91,20 @@ export function RouteView({ onStartNavigation }: RouteViewProps) {
   };
 
   const handleNavigate = () => {
-    if (onStartNavigation) {
-      onStartNavigation();
+    if (route) {
+      setNavDestination({ lat: route.finalDestLat, lng: route.finalDestLng });
+      setIsNavModalOpen(true);
     }
   };
 
   return (
     <div className="pt-24 px-4 pb-32 h-full overflow-y-auto relative z-10">
+      <NavigationModal 
+        isOpen={isNavModalOpen} 
+        onClose={() => setIsNavModalOpen(false)} 
+        destination={navDestination} 
+      />
+
       <h2 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#e7e7e7] to-[#b0b0b0] mb-8 tracking-tight drop-shadow-md">Planejar Rota</h2>
 
       <div className="liquid-glass rounded-[2rem] p-6 mb-8 relative">
@@ -107,7 +119,7 @@ export function RouteView({ onStartNavigation }: RouteViewProps) {
             placeholder="Localização atual" 
             value={origin}
             onChange={(e) => setOrigin(e.target.value)}
-            className="flex-1 bg-black/40 border border-white/10 rounded-2xl px-5 py-4 text-sm text-[#e7e7e7] focus:outline-none focus:border-[#FAB515] focus:bg-black/60 transition-all backdrop-blur-md shadow-inner"
+            className="flex-1 liquid-glass rounded-2xl px-5 py-4 text-sm text-white focus:outline-none focus:border-[#FAB515] transition-all shadow-inner placeholder-gray-400"
           />
         </div>
 
@@ -120,7 +132,7 @@ export function RouteView({ onStartNavigation }: RouteViewProps) {
             placeholder="Destino" 
             value={dest}
             onChange={(e) => setDest(e.target.value)}
-            className="flex-1 bg-black/40 border border-white/10 rounded-2xl px-5 py-4 text-sm text-[#e7e7e7] focus:outline-none focus:border-[#FAB515] focus:bg-black/60 transition-all backdrop-blur-md shadow-inner"
+            className="flex-1 liquid-glass rounded-2xl px-5 py-4 text-sm text-white focus:outline-none focus:border-[#FAB515] transition-all shadow-inner placeholder-gray-400"
           />
         </div>
       </div>
@@ -186,14 +198,14 @@ export function RouteView({ onStartNavigation }: RouteViewProps) {
             
             {route.stops.map((stop: any, idx: number) => (
               <div key={idx} className="flex items-start space-x-4 relative z-10">
-                <div className="w-12 h-12 rounded-full bg-black/60 backdrop-blur-md border border-[#FAB515]/50 flex items-center justify-center flex-shrink-0 mt-1 shadow-[0_0_15px_rgba(250,181,21,0.2)]">
+                <div className="w-12 h-12 rounded-full liquid-glass flex items-center justify-center flex-shrink-0 mt-1 shadow-[0_0_15px_rgba(250,181,21,0.2)]">
                   <Zap size={20} className="text-[#FAB515]" />
                 </div>
-                <div className="flex-1 bg-black/40 backdrop-blur-md border border-white/10 rounded-2xl p-4 hover:bg-black/60 transition-colors shadow-lg">
-                  <p className="font-bold text-[#e7e7e7] text-base mb-1">{stop.name}</p>
-                  <p className="text-xs text-[#b0b0b0] mb-3">Chegada com {stop.arrival} • Recarregar até {stop.target}</p>
+                <div className="flex-1 liquid-glass rounded-2xl p-4 liquid-glass-hover">
+                  <p className="font-bold text-white text-base mb-1">{stop.name}</p>
+                  <p className="text-xs text-gray-300 mb-3">Chegada com {stop.arrival} • Recarregar até {stop.target}</p>
                   <div className="flex items-center justify-between text-xs font-bold">
-                    <span className="text-[#e7e7e7] bg-white/10 border border-white/5 px-3 py-1.5 rounded-lg">{stop.time}</span>
+                    <span className="text-white bg-white/10 border border-white/5 px-3 py-1.5 rounded-lg">{stop.time}</span>
                     <span className="text-[#FAB515] bg-[#FAB515]/10 border border-[#FAB515]/20 px-3 py-1.5 rounded-lg">{stop.cost} est.</span>
                   </div>
                 </div>

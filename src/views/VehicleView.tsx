@@ -1,180 +1,368 @@
 import { useState } from 'react';
-import { Car, Battery, MapPin, Settings2, Plus } from 'lucide-react';
+import { Car, Battery, Zap, Plus, Trash2, Search, X } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
+
+interface Vehicle {
+  id: string;
+  type: string;
+  brand: string;
+  model: string;
+  plate: string;
+  chassis: string;
+  capacity: string;
+  autonomy: string;
+}
+
+const MOCK_BRANDS = ['Audi', 'BMW', 'BYD', 'Chevrolet', 'Fiat', 'Ford', 'GWM', 'Hyundai', 'JAC', 'Kia', 'Mercedes-Benz', 'Mini', 'Nissan', 'Peugeot', 'Porsche', 'Renault', 'Volvo'];
+const MOCK_MODELS: Record<string, string[]> = {
+  'BYD': ['Dolphin', 'Dolphin Plus', 'Dolphin Mini', 'Seal', 'Yuan Plus', 'Han', 'Tan', 'D1'],
+  'Volvo': ['EX30', 'XC40 Recharge', 'C40 Recharge'],
+  'GWM': ['Ora 03 Skin', 'Ora 03 GT', 'Haval H6 PHEV'],
+  'Nissan': ['Leaf'],
+  'Renault': ['Kwid E-Tech', 'Zoe', 'Megane E-Tech'],
+  'Chevrolet': ['Bolt EV', 'Bolt EUV'],
+  'Fiat': ['500e'],
+  'Peugeot': ['e-208 GT', 'e-2008'],
+  'BMW': ['i3', 'iX3', 'i4', 'iX'],
+  'Audi': ['e-tron', 'e-tron GT', 'Q8 e-tron'],
+  'Porsche': ['Taycan'],
+  'Mini': ['Cooper SE'],
+  'JAC': ['E-JS1', 'E-JS4', 'E-J7'],
+  'Ford': ['Mustang Mach-E'],
+  'Kia': ['EV6', 'Niro EV'],
+  'Hyundai': ['Kona EV', 'Ioniq 5'],
+  'Mercedes-Benz': ['EQA', 'EQB', 'EQC', 'EQE', 'EQS']
+};
 
 export function VehicleView() {
-  const [vehicles, setVehicles] = useState<any[]>([
-    { id: 1, model: 'BYD Dolphin', plate: 'ABC-1234', currentBattery: 65, plugType: 'CCS2 / Type 2' }
-  ]);
+  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [isAdding, setIsAdding] = useState(false);
-  const [newVehicle, setNewVehicle] = useState({ model: '', plate: '', capacity: '', plug: 'CCS2' });
+  
+  // Form State
+  const [type, setType] = useState('100% Elétrico');
+  const [brand, setBrand] = useState('');
+  const [model, setModel] = useState('');
+  const [plate, setPlate] = useState('');
+  const [chassis, setChassis] = useState('');
+  const [capacity, setCapacity] = useState('');
+  const [autonomy, setAutonomy] = useState('');
 
-  const handleAddVehicle = () => {
-    if (!newVehicle.model || !newVehicle.plate || !newVehicle.capacity) return;
-    setVehicles([...vehicles, {
-      id: Date.now(),
-      model: newVehicle.model,
-      plate: newVehicle.plate,
-      currentBattery: 100,
-      plugType: newVehicle.plug
-    }]);
+  // Dropdown State
+  const [showBrandDropdown, setShowBrandDropdown] = useState(false);
+  const [showModelDropdown, setShowModelDropdown] = useState(false);
+  const [brandSearch, setBrandSearch] = useState('');
+  const [modelSearch, setModelSearch] = useState('');
+
+  const filteredBrands = MOCK_BRANDS.filter(b => b.toLowerCase().includes(brandSearch.toLowerCase()));
+  const availableModels = brand && MOCK_MODELS[brand] ? MOCK_MODELS[brand] : [];
+  const filteredModels = availableModels.filter(m => m.toLowerCase().includes(modelSearch.toLowerCase()));
+
+  const handleAddVehicle = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!brand || !model || !plate) return;
+
+    const newVehicle: Vehicle = {
+      id: Date.now().toString(),
+      type,
+      brand,
+      model,
+      plate: plate.toUpperCase(),
+      chassis: chassis.toUpperCase(),
+      capacity,
+      autonomy
+    };
+
+    setVehicles([...vehicles, newVehicle]);
     setIsAdding(false);
-    setNewVehicle({ model: '', plate: '', capacity: '', plug: 'CCS2' });
+    
+    // Reset form
+    setType('100% Elétrico');
+    setBrand('');
+    setModel('');
+    setPlate('');
+    setChassis('');
+    setCapacity('');
+    setAutonomy('');
   };
 
-  if (isAdding) {
-    return (
-      <div className="pt-24 px-4 pb-32 h-full overflow-y-auto relative z-10">
-        <div className="flex justify-between items-center mb-8">
-          <h2 className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#e7e7e7] to-[#b0b0b0] tracking-tight drop-shadow-md">Adicionar Veículo</h2>
-          <button 
-            onClick={() => setIsAdding(false)}
-            className="text-[#b0b0b0] hover:text-[#e7e7e7] font-bold"
-          >
-            Cancelar
-          </button>
-        </div>
-
-        <div className="liquid-glass rounded-[2rem] p-6 space-y-5 animate-in fade-in slide-in-from-bottom-4">
-          <div>
-            <label className="block text-sm font-bold text-[#b0b0b0] mb-2 uppercase tracking-widest">Modelo do Veículo</label>
-            <input 
-              type="text" 
-              value={newVehicle.model}
-              onChange={(e) => setNewVehicle({...newVehicle, model: e.target.value})}
-              placeholder="Ex: BYD Dolphin"
-              className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-[#e7e7e7] focus:outline-none focus:border-[#FAB515] focus:bg-white/10 transition-all backdrop-blur-md"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-bold text-[#b0b0b0] mb-2 uppercase tracking-widest">Placa</label>
-            <input 
-              type="text" 
-              value={newVehicle.plate}
-              onChange={(e) => setNewVehicle({...newVehicle, plate: e.target.value})}
-              placeholder="ABC-1234"
-              className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-[#e7e7e7] focus:outline-none focus:border-[#FAB515] focus:bg-white/10 transition-all backdrop-blur-md"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-bold text-[#b0b0b0] mb-2 uppercase tracking-widest">Capacidade da Bateria (kWh)</label>
-            <input 
-              type="number" 
-              value={newVehicle.capacity}
-              onChange={(e) => setNewVehicle({...newVehicle, capacity: e.target.value})}
-              placeholder="Ex: 44.9"
-              className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-[#e7e7e7] focus:outline-none focus:border-[#FAB515] focus:bg-white/10 transition-all backdrop-blur-md"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-bold text-[#b0b0b0] mb-2 uppercase tracking-widest">Tipo de Conector</label>
-            <select 
-              value={newVehicle.plug}
-              onChange={(e) => setNewVehicle({...newVehicle, plug: e.target.value})}
-              className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-[#e7e7e7] focus:outline-none focus:border-[#FAB515] focus:bg-white/10 transition-all backdrop-blur-md appearance-none"
-            >
-              <option value="CCS2" className="bg-[#363535]">CCS2</option>
-              <option value="Type 2" className="bg-[#363535]">Type 2</option>
-              <option value="CHAdeMO" className="bg-[#363535]">CHAdeMO</option>
-            </select>
-          </div>
-
-          <button 
-            onClick={handleAddVehicle}
-            disabled={!newVehicle.model || !newVehicle.plate || !newVehicle.capacity}
-            className="w-full bg-gradient-to-r from-[#0D518E] to-[#0b4275] text-[#e7e7e7] py-4 rounded-2xl font-bold mt-6 hover:scale-[1.02] transition-transform shadow-[0_8px_24px_0_rgba(13,81,142,0.4)] disabled:opacity-50 disabled:hover:scale-100"
-          >
-            Salvar Veículo
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  if (vehicles.length === 0) {
-    return (
-      <div className="pt-24 px-4 pb-32 h-full flex flex-col items-center justify-center text-center relative z-10">
-        <div className="w-28 h-28 liquid-glass rounded-full flex items-center justify-center mb-8 shadow-[0_0_30px_rgba(250,181,21,0.2)]">
-          <Car size={48} className="text-[#FAB515]" />
-        </div>
-        <h2 className="text-2xl font-extrabold text-[#e7e7e7] mb-3">Nenhum veículo cadastrado</h2>
-        <p className="text-[#b0b0b0] mb-10 max-w-xs leading-relaxed">Adicione seu veículo elétrico para estimar rotas e ver postos compatíveis.</p>
-        <button 
-          onClick={() => setIsAdding(true)}
-          className="w-full max-w-xs bg-gradient-to-r from-[#0D518E] to-[#0b4275] text-[#e7e7e7] py-4 rounded-2xl font-bold flex items-center justify-center space-x-2 shadow-[0_8px_24px_0_rgba(13,81,142,0.4)] hover:scale-[1.02] transition-transform"
-        >
-          <Plus size={20} />
-          <span>Adicionar Veículo</span>
-        </button>
-      </div>
-    );
-  }
-
-  const vehicle = vehicles[0]; // Show first vehicle for now
+  const removeVehicle = (id: string) => {
+    setVehicles(vehicles.filter(v => v.id !== id));
+  };
 
   return (
     <div className="pt-24 px-4 pb-32 h-full overflow-y-auto relative z-10">
       <div className="flex justify-between items-center mb-8">
-        <h2 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#e7e7e7] to-[#b0b0b0] tracking-tight drop-shadow-md">Meu Veículo</h2>
-        <button className="w-12 h-12 liquid-glass rounded-full flex items-center justify-center text-[#b0b0b0] hover:text-[#e7e7e7] liquid-glass-hover">
-          <Settings2 size={24} />
-        </button>
+        <h2 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#e7e7e7] to-[#b0b0b0] tracking-tight drop-shadow-md">Meus Veículos</h2>
+        {!isAdding && (
+          <button 
+            onClick={() => setIsAdding(true)}
+            className="w-10 h-10 bg-[#FAB515] text-[#121212] rounded-full flex items-center justify-center shadow-[0_0_15px_rgba(250,181,21,0.5)] hover:scale-110 transition-transform"
+          >
+            <Plus size={24} />
+          </button>
+        )}
       </div>
 
-      <div className="liquid-glass rounded-[2rem] p-6 mb-8 relative overflow-hidden animate-in fade-in slide-in-from-bottom-4">
-        <div className="absolute top-0 right-0 w-full h-full bg-gradient-to-b from-white/5 to-transparent pointer-events-none"></div>
-        
-        <div className="relative z-10 flex flex-col items-center">
-          {/* Placeholder for Car Image */}
-          <div className="w-56 h-28 mb-8 relative">
-            <div className="absolute inset-x-0 bottom-0 h-6 bg-black/50 blur-xl rounded-full"></div>
-            <img 
-              src="https://images.unsplash.com/photo-1560958089-b8a1929cea89?auto=format&fit=crop&q=80&w=400&h=200" 
-              alt={vehicle.model} 
-              className="w-full h-full object-cover rounded-2xl shadow-[0_16px_40px_rgba(0,0,0,0.5)]"
-            />
-          </div>
-
-          <h3 className="text-2xl font-extrabold text-[#e7e7e7] mb-1 tracking-tight">{vehicle.model}</h3>
-          <p className="text-[#b0b0b0] text-sm mb-8 font-medium">Placa: {vehicle.plate} • Conector: {vehicle.plugType}</p>
-
-          <div className="w-full bg-white/5 backdrop-blur-md rounded-[2rem] p-5 border border-white/10 shadow-inner">
-            <div className="flex justify-between items-end mb-3">
-              <div className="flex items-center space-x-3">
-                <Battery className="text-[#FAB515] drop-shadow-[0_0_8px_rgba(250,181,21,0.5)]" size={28} />
-                <span className="text-3xl font-extrabold text-[#e7e7e7]">{vehicle.currentBattery}%</span>
-              </div>
-              <div className="text-right">
-                <span className="text-xs font-bold text-[#b0b0b0] uppercase tracking-widest">Alcance Est.</span>
-                <p className="text-2xl font-extrabold text-[#e7e7e7]">{Math.round((vehicle.currentBattery / 100) * 350)} <span className="text-sm font-medium text-[#b0b0b0]">km</span></p>
-              </div>
+      <AnimatePresence mode="wait">
+        {isAdding ? (
+          <motion.div 
+            key="add-form"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="liquid-glass rounded-[2rem] p-6"
+          >
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-xl font-bold text-white">Adicionar Veículo</h3>
+              <button onClick={() => setIsAdding(false)} className="text-gray-400 hover:text-white">
+                <X size={24} />
+              </button>
             </div>
-            
-            <div className="w-full h-4 bg-black/40 rounded-full overflow-hidden mt-5 shadow-inner border border-white/5">
-              <div className="h-full bg-gradient-to-r from-[#FAB515] to-[#fcd34d] rounded-full shadow-[0_0_10px_rgba(250,181,21,0.8)]" style={{ width: `${vehicle.currentBattery}%` }}></div>
-            </div>
-          </div>
-        </div>
-      </div>
 
-      <h3 className="text-xl font-bold text-[#e7e7e7] mb-5">Postos no seu alcance</h3>
-      <div className="space-y-4">
-        {[1, 2].map((i) => (
-          <div key={i} className="liquid-glass rounded-2xl p-5 flex items-center justify-between liquid-glass-hover">
-            <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 bg-white/5 backdrop-blur-md border border-white/10 rounded-full flex items-center justify-center text-[#FAB515] shadow-inner">
-                <MapPin size={20} />
-              </div>
+            <form onSubmit={handleAddVehicle} className="space-y-4">
               <div>
-                <p className="font-bold text-[#e7e7e7]">Eletroposto {i === 1 ? 'Ibirapuera' : 'Paulista'}</p>
-                <p className="text-xs text-[#b0b0b0] mt-1 font-medium">{i === 1 ? '5.1 km' : '8.3 km'} • Chegará com {i === 1 ? vehicle.currentBattery - 3 : vehicle.currentBattery - 5}%</p>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Tipo de Veículo</label>
+                <div className="flex space-x-2">
+                  <button 
+                    type="button"
+                    onClick={() => setType('100% Elétrico')}
+                    className={`flex-1 py-3 rounded-xl text-sm font-bold transition-colors ${type === '100% Elétrico' ? 'bg-[#FAB515] text-[#121212]' : 'bg-white/5 text-white border border-white/10'}`}
+                  >
+                    100% Elétrico
+                  </button>
+                  <button 
+                    type="button"
+                    onClick={() => setType('Híbrido Plug-in')}
+                    className={`flex-1 py-3 rounded-xl text-sm font-bold transition-colors ${type === 'Híbrido Plug-in' ? 'bg-[#FAB515] text-[#121212]' : 'bg-white/5 text-white border border-white/10'}`}
+                  >
+                    Híbrido Plug-in
+                  </button>
+                </div>
               </div>
-            </div>
-            <button className="px-4 py-2 bg-white/10 backdrop-blur-md border border-white/10 text-[#e7e7e7] rounded-xl text-sm font-bold hover:bg-white/20 transition-colors shadow-md">
-              Rotas
-            </button>
-          </div>
-        ))}
-      </div>
+
+              {/* Brand Select */}
+              <div className="relative">
+                <label className="block text-sm font-medium text-gray-300 mb-2">Marca</label>
+                <div 
+                  onClick={() => setShowBrandDropdown(!showBrandDropdown)}
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white cursor-pointer flex justify-between items-center"
+                >
+                  <span>{brand || 'Selecione a marca'}</span>
+                </div>
+                
+                {showBrandDropdown && (
+                  <div className="absolute z-50 w-full mt-2 bg-[#1a1a1a] border border-white/10 rounded-xl shadow-2xl max-h-60 overflow-y-auto">
+                    <div className="p-2 sticky top-0 bg-[#1a1a1a] border-b border-white/10">
+                      <div className="relative">
+                        <Search size={16} className="absolute left-3 top-2.5 text-gray-400" />
+                        <input 
+                          type="text" 
+                          placeholder="Buscar marca..." 
+                          value={brandSearch}
+                          onChange={(e) => setBrandSearch(e.target.value)}
+                          className="w-full bg-white/5 rounded-lg pl-9 pr-3 py-2 text-sm text-white focus:outline-none"
+                          onClick={(e) => e.stopPropagation()}
+                        />
+                      </div>
+                    </div>
+                    {filteredBrands.map(b => (
+                      <div 
+                        key={b} 
+                        className="px-4 py-3 hover:bg-white/5 cursor-pointer text-white text-sm"
+                        onClick={() => {
+                          setBrand(b);
+                          setModel(''); // Reset model when brand changes
+                          setShowBrandDropdown(false);
+                          setBrandSearch('');
+                        }}
+                      >
+                        {b}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Model Select */}
+              <div className="relative">
+                <label className="block text-sm font-medium text-gray-300 mb-2">Modelo</label>
+                <div 
+                  onClick={() => brand && setShowModelDropdown(!showModelDropdown)}
+                  className={`w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white flex justify-between items-center ${!brand ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                >
+                  <span>{model || 'Selecione o modelo'}</span>
+                </div>
+                
+                {showModelDropdown && brand && (
+                  <div className="absolute z-50 w-full mt-2 bg-[#1a1a1a] border border-white/10 rounded-xl shadow-2xl max-h-60 overflow-y-auto">
+                    <div className="p-2 sticky top-0 bg-[#1a1a1a] border-b border-white/10">
+                      <div className="relative">
+                        <Search size={16} className="absolute left-3 top-2.5 text-gray-400" />
+                        <input 
+                          type="text" 
+                          placeholder="Buscar modelo..." 
+                          value={modelSearch}
+                          onChange={(e) => setModelSearch(e.target.value)}
+                          className="w-full bg-white/5 rounded-lg pl-9 pr-3 py-2 text-sm text-white focus:outline-none"
+                          onClick={(e) => e.stopPropagation()}
+                        />
+                      </div>
+                    </div>
+                    {filteredModels.length > 0 ? filteredModels.map(m => (
+                      <div 
+                        key={m} 
+                        className="px-4 py-3 hover:bg-white/5 cursor-pointer text-white text-sm"
+                        onClick={() => {
+                          setModel(m);
+                          setShowModelDropdown(false);
+                          setModelSearch('');
+                        }}
+                      >
+                        {m}
+                      </div>
+                    )) : (
+                      <div className="px-4 py-3 text-gray-400 text-sm">
+                        <input 
+                          type="text" 
+                          placeholder="Digite o modelo..." 
+                          value={model}
+                          onChange={(e) => setModel(e.target.value)}
+                          className="w-full bg-transparent focus:outline-none text-white"
+                          onClick={(e) => e.stopPropagation()}
+                        />
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Placa</label>
+                  <input 
+                    type="text" 
+                    value={plate}
+                    onChange={(e) => setPlate(e.target.value)}
+                    placeholder="ABC-1234"
+                    required
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#FAB515] uppercase"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Chassi (Opcional)</label>
+                  <input 
+                    type="text" 
+                    value={chassis}
+                    onChange={(e) => setChassis(e.target.value)}
+                    placeholder="17 caracteres"
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#FAB515] uppercase"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Bateria (kWh)</label>
+                  <input 
+                    type="number" 
+                    value={capacity}
+                    onChange={(e) => setCapacity(e.target.value)}
+                    placeholder="Ex: 60"
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#FAB515]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Autonomia (km)</label>
+                  <input 
+                    type="number" 
+                    value={autonomy}
+                    onChange={(e) => setAutonomy(e.target.value)}
+                    placeholder="Ex: 400"
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#FAB515]"
+                  />
+                </div>
+              </div>
+
+              <button 
+                type="submit"
+                className="w-full mt-6 bg-[#FAB515] text-[#121212] py-4 rounded-xl font-bold hover:bg-[#e5a313] transition-colors shadow-[0_0_20px_rgba(250,181,21,0.3)]"
+              >
+                Salvar Veículo
+              </button>
+            </form>
+          </motion.div>
+        ) : (
+          <motion.div 
+            key="vehicle-list"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="space-y-4"
+          >
+            {vehicles.length === 0 ? (
+              <div className="liquid-glass rounded-[2rem] p-10 text-center flex flex-col items-center justify-center">
+                <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mb-4 border border-white/10">
+                  <Car size={40} className="text-gray-400" />
+                </div>
+                <h3 className="text-xl font-bold text-white mb-2">Nenhum veículo</h3>
+                <p className="text-gray-400 mb-6">Adicione seu veículo elétrico para uma experiência personalizada.</p>
+                <button 
+                  onClick={() => setIsAdding(true)}
+                  className="bg-[#FAB515] text-[#121212] px-6 py-3 rounded-xl font-bold hover:bg-[#e5a313] transition-colors shadow-[0_0_15px_rgba(250,181,21,0.3)]"
+                >
+                  Adicionar Veículo
+                </button>
+              </div>
+            ) : (
+              vehicles.map(vehicle => (
+                <div key={vehicle.id} className="liquid-glass rounded-[2rem] p-6 relative overflow-hidden group">
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-white/5 to-transparent rounded-bl-full pointer-events-none"></div>
+                  
+                  <div className="flex justify-between items-start mb-4 relative z-10">
+                    <div className="flex items-center space-x-4">
+                      <div className="w-14 h-14 bg-[#FAB515]/20 rounded-full flex items-center justify-center border border-[#FAB515]/30 shadow-[0_0_15px_rgba(250,181,21,0.2)]">
+                        <Car size={28} className="text-[#FAB515]" />
+                      </div>
+                      <div>
+                        <h3 className="text-2xl font-bold text-white">{vehicle.brand} {vehicle.model}</h3>
+                        <p className="text-sm text-[#FAB515] font-medium">{vehicle.type}</p>
+                      </div>
+                    </div>
+                    <button 
+                      onClick={() => removeVehicle(vehicle.id)}
+                      className="p-2 bg-red-500/10 text-red-500 rounded-full hover:bg-red-500 hover:text-white transition-colors"
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4 mt-6 relative z-10">
+                    <div className="bg-white/5 rounded-2xl p-4 border border-white/10">
+                      <div className="flex items-center space-x-2 text-gray-400 mb-1">
+                        <Battery size={16} />
+                        <span className="text-xs font-medium uppercase tracking-wider">Bateria</span>
+                      </div>
+                      <p className="text-lg font-bold text-white">{vehicle.capacity ? `${vehicle.capacity} kWh` : 'N/A'}</p>
+                    </div>
+                    <div className="bg-white/5 rounded-2xl p-4 border border-white/10">
+                      <div className="flex items-center space-x-2 text-gray-400 mb-1">
+                        <Zap size={16} />
+                        <span className="text-xs font-medium uppercase tracking-wider">Autonomia</span>
+                      </div>
+                      <p className="text-lg font-bold text-white">{vehicle.autonomy ? `${vehicle.autonomy} km` : 'N/A'}</p>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 flex items-center justify-between text-sm text-gray-400 relative z-10">
+                    <span>Placa: <span className="text-white font-bold">{vehicle.plate}</span></span>
+                    {vehicle.chassis && <span>Chassi: <span className="text-white font-bold">{vehicle.chassis}</span></span>}
+                  </div>
+                </div>
+              ))
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

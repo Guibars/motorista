@@ -1,26 +1,55 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { APIProvider } from '@vis.gl/react-google-maps';
 import { Header } from './components/Header';
 import { BottomNav } from './components/BottomNav';
 import { LoginScreen } from './components/LoginScreen';
+import { SplashScreen } from './components/SplashScreen';
+import { TipsModal } from './components/TipsModal';
 import { MapView } from './views/MapView';
 import { RouteView } from './views/RouteView';
 import { ChargeView } from './views/ChargeView';
 import { VehicleView } from './views/VehicleView';
 import { WalletView } from './views/WalletView';
 import { ProfileView } from './views/ProfileView';
+import { supabase } from './lib/supabase';
 
 export default function App() {
+  const [showSplash, setShowSplash] = useState(true);
   const [user, setUser] = useState<any | null>(null);
+  const [isGuest, setIsGuest] = useState(false);
   const [activeTab, setActiveTab] = useState('map');
   const [isNavigating, setIsNavigating] = useState(false);
+  const [isTipsModalOpen, setIsTipsModalOpen] = useState(false);
 
-  if (!user) {
-    return <LoginScreen onLogin={setUser} />;
+  useEffect(() => {
+    // Check active session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  if (showSplash) {
+    return <SplashScreen onComplete={() => setShowSplash(false)} />;
   }
 
-  const handleLogout = () => {
-    setUser(null);
+  if (!user && !isGuest) {
+    return <LoginScreen onLogin={setUser} onGuest={() => setIsGuest(true)} />;
+  }
+
+  const handleLogout = async () => {
+    if (isGuest) {
+      setIsGuest(false);
+    } else {
+      await supabase.auth.signOut();
+      setUser(null);
+    }
   };
 
   const handleStartNavigation = () => {
@@ -35,7 +64,7 @@ export default function App() {
       case 'charge': return <ChargeView />;
       case 'vehicle': return <VehicleView />;
       case 'wallet': return <WalletView />;
-      case 'profile': return <ProfileView user={user} onLogout={handleLogout} />;
+      case 'profile': return <ProfileView user={user || { email: 'Convidado' }} onLogout={handleLogout} />;
       default: return <MapView isNavigating={isNavigating} setIsNavigating={setIsNavigating} />;
     }
   };
@@ -51,7 +80,7 @@ export default function App() {
         </div>
         
         <div className="relative z-10 flex flex-col h-full w-full">
-          {!isNavigating && <Header onProfileClick={() => setActiveTab('profile')} onLogout={handleLogout} />}
+          {!isNavigating && <Header onProfileClick={() => setActiveTab('profile')} onLogout={handleLogout} onTipsClick={() => setIsTipsModalOpen(true)} />}
           
           <main className="flex-1 relative">
             {renderView()}
@@ -59,6 +88,8 @@ export default function App() {
 
           {!isNavigating && <BottomNav activeTab={activeTab} onChange={setActiveTab} />}
         </div>
+        
+        <TipsModal isOpen={isTipsModalOpen} onClose={() => setIsTipsModalOpen(false)} />
       </div>
     </APIProvider>
   );

@@ -50,9 +50,9 @@
 /* Utilities for iOS 26.4 Liquid Glass */
 @layer utilities {
   .liquid-glass {
-    @apply bg-black/40 backdrop-blur-[40px] border border-white/10 shadow-[0_16px_40px_rgba(0,0,0,0.8)];
+    @apply bg-[#121212]/85 backdrop-blur-2xl border border-white/15 shadow-[0_8px_32px_rgba(0,0,0,0.6)];
   }
   .liquid-glass-hover {
-    @apply hover:bg-black/50 hover:border-white/20 hover:shadow-[0_24px_50px_rgba(0,0,0,0.9)] transition-all duration-300;
+    @apply hover:bg-[#1a1a1a]/95 hover:border-white/30 hover:shadow-[0_16px_48px_rgba(0,0,0,0.8)] transition-all duration-300;
   }
 }

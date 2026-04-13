@@ -1,12 +1,13 @@
-import { User, Bell, LogOut } from 'lucide-react';
+import { User, Bell, LogOut, Menu, Lightbulb } from 'lucide-react';
 import { motion } from 'motion/react';
 
 interface HeaderProps {
   onProfileClick: () => void;
   onLogout: () => void;
+  onTipsClick?: () => void;
 }
 
-export function Header({ onProfileClick, onLogout }: HeaderProps) {
+export function Header({ onProfileClick, onLogout, onTipsClick }: HeaderProps) {
   return (
     <header className="fixed top-4 left-4 right-4 z-50">
       <div className="bg-white/10 backdrop-blur-[40px] border border-white/20 rounded-[2rem] shadow-[0_8px_32px_rgba(0,0,0,0.4)] h-16 px-4 flex items-center justify-between relative overflow-hidden">
@@ -15,13 +16,24 @@ export function Header({ onProfileClick, onLogout }: HeaderProps) {
 
         <div className="flex items-center relative z-10">
           <img 
-            src="https://i.postimg.cc/zfh3tqwd/LOGO-Fotus-2A-1024x272.png" 
+            src="https://res.cloudinary.com/ddtpuucfi/image/upload/v1776089289/CHARGE_3_afxm8u.png" 
             alt="Fotus Charge" 
-            className="h-8 object-contain drop-shadow-md"
+            className="h-14 md:h-16 object-contain drop-shadow-md"
             referrerPolicy="no-referrer"
           />
         </div>
         <div className="flex items-center space-x-3 relative z-10">
+          {onTipsClick && (
+            <motion.button 
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={onTipsClick}
+              className="relative p-2 text-[#FAB515] hover:text-[#e5a313] transition-colors"
+              title="Dicas"
+            >
+              <Lightbulb size={20} />
+            </motion.button>
+          )}
           <motion.button 
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
