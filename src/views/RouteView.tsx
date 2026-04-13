@@ -98,7 +98,7 @@ export function RouteView({ onStartNavigation }: RouteViewProps) {
   };
 
   return (
-    <div className="pt-24 px-4 pb-32 h-full overflow-y-auto relative z-10">
+    <div className="pt-24 px-4 pb-40 h-full overflow-y-auto relative z-10 no-scrollbar">
       <NavigationModal 
         isOpen={isNavModalOpen} 
         onClose={() => setIsNavModalOpen(false)} 

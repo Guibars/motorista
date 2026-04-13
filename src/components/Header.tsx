@@ -10,15 +10,15 @@ interface HeaderProps {
 export function Header({ onProfileClick, onLogout, onTipsClick }: HeaderProps) {
   return (
     <header className="fixed top-4 left-4 right-4 z-50">
-      <div className="bg-white/10 backdrop-blur-[40px] border border-white/20 rounded-[2rem] shadow-[0_8px_32px_rgba(0,0,0,0.4)] h-16 px-4 flex items-center justify-between relative overflow-hidden">
+      <div className="bg-white/10 backdrop-blur-[40px] border border-white/20 rounded-[2rem] shadow-[0_8px_32px_rgba(0,0,0,0.4)] h-20 px-4 flex items-center justify-between relative overflow-hidden">
         {/* Liquid Glass Highlight Effect */}
         <div className="absolute inset-0 bg-gradient-to-b from-white/10 to-transparent pointer-events-none"></div>
 
-        <div className="flex items-center relative z-10">
+        <div className="flex items-center relative z-10 pl-2">
           <img 
             src="https://res.cloudinary.com/ddtpuucfi/image/upload/v1776089289/CHARGE_3_afxm8u.png" 
             alt="Fotus Charge" 
-            className="h-14 md:h-16 object-contain drop-shadow-md"
+            className="h-20 md:h-24 scale-150 origin-left object-contain drop-shadow-md"
             referrerPolicy="no-referrer"
           />
         </div>

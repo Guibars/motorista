@@ -25,6 +25,7 @@ export function MapView({ isNavigating = false, setIsNavigating }: MapViewProps)
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [userLocation, setUserLocation] = useState<google.maps.LatLngLiteral | null>(null);
   const [mapCenter, setMapCenter] = useState<google.maps.LatLngLiteral>({ lat: -23.6000, lng: -46.6800 });
+  const [mapZoom, setMapZoom] = useState(13);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   
@@ -95,6 +96,7 @@ export function MapView({ isNavigating = false, setIsNavigating }: MapViewProps)
         };
         setUserLocation(pos);
         setMapCenter(pos);
+        setMapZoom(15);
         fetchStations(pos);
       });
     }
@@ -116,8 +118,7 @@ export function MapView({ isNavigating = false, setIsNavigating }: MapViewProps)
         const location = results[0].geometry.location;
         const pos = { lat: location.lat(), lng: location.lng() };
         setMapCenter(pos);
-        map.panTo(pos);
-        map.setZoom(14);
+        setMapZoom(14);
         fetchStations(pos);
       } else {
         alert('Local não encontrado. Tente outro termo.');
@@ -142,7 +143,7 @@ export function MapView({ isNavigating = false, setIsNavigating }: MapViewProps)
   };
 
   return (
-    <div className="relative w-full h-[calc(100vh-4rem)] pt-16">
+    <div className="relative w-full h-[calc(100vh-4rem)] pt-20">
       <NavigationModal 
         isOpen={isNavModalOpen} 
         onClose={() => setIsNavModalOpen(false)} 
@@ -150,9 +151,9 @@ export function MapView({ isNavigating = false, setIsNavigating }: MapViewProps)
       />
 
       {/* Top Search Bar - Pill Shaped */}
-      <div className="absolute top-20 left-4 right-4 z-[400] flex space-x-2">
-        <form onSubmit={handleSearch} className="flex-1 bg-[#1a1a1a]/90 backdrop-blur-md border border-white/10 rounded-full shadow-lg flex items-center px-4 py-3">
-          <Search size={20} className="text-gray-400 mr-3" />
+      <div className="absolute top-24 left-4 right-4 z-[400] flex space-x-2">
+        <form onSubmit={handleSearch} className="flex-1 bg-[#1a1a1a]/90 backdrop-blur-md border border-white/10 rounded-full shadow-lg flex items-center px-3 py-2 md:px-4 md:py-3">
+          <Search size={18} className="text-gray-400 mr-2 md:mr-3" />
           <input 
             type="text" 
             placeholder="Buscar endereço ou região..." 
@@ -161,7 +162,7 @@ export function MapView({ isNavigating = false, setIsNavigating }: MapViewProps)
             className="flex-1 bg-transparent border-none text-white focus:outline-none text-sm"
           />
           {isSearching ? (
-            <Loader2 size={20} className="text-[#FAB515] animate-spin ml-2" />
+            <Loader2 size={18} className="text-[#FAB515] animate-spin ml-2" />
           ) : (
             searchQuery && (
               <button type="button" onClick={() => setSearchQuery('')} className="text-gray-400 hover:text-white ml-2">
@@ -170,59 +171,60 @@ export function MapView({ isNavigating = false, setIsNavigating }: MapViewProps)
             )
           )}
         </form>
-        <button className="w-12 h-12 bg-[#1a1a1a]/90 backdrop-blur-md border border-white/10 rounded-full flex items-center justify-center text-white shadow-lg hover:bg-white/10 transition-colors">
-          <Filter size={20} />
+        <button className="w-10 h-10 md:w-12 md:h-12 bg-[#1a1a1a]/90 backdrop-blur-md border border-white/10 rounded-full flex items-center justify-center text-white shadow-lg hover:bg-white/10 transition-colors">
+          <Filter size={18} />
         </button>
       </div>
 
-      <div className="absolute top-36 left-4 right-4 z-[400] flex space-x-2 overflow-x-auto pb-2 no-scrollbar">
-        <button className="px-4 py-2 liquid-glass rounded-full text-sm font-medium whitespace-nowrap text-white liquid-glass-hover">
+      <div className="absolute top-36 md:top-40 left-4 right-4 z-[400] flex space-x-2 overflow-x-auto pb-2 no-scrollbar">
+        <button className="px-3 py-1.5 md:px-4 md:py-2 liquid-glass rounded-full text-xs md:text-sm font-medium whitespace-nowrap text-white liquid-glass-hover">
           Todos os Conectores
         </button>
-        <button className="px-4 py-2 liquid-glass rounded-full text-sm font-medium whitespace-nowrap text-white liquid-glass-hover">
+        <button className="px-3 py-1.5 md:px-4 md:py-2 liquid-glass rounded-full text-xs md:text-sm font-medium whitespace-nowrap text-white liquid-glass-hover">
           Potência &gt; 50kW
         </button>
       </div>
 
-      <div className="absolute top-48 left-1/2 -translate-x-1/2 z-[400]">
+      <div className="absolute top-48 md:top-56 left-1/2 -translate-x-1/2 z-[400]">
         <button 
           onClick={handleRefresh}
-          className="px-5 py-2.5 liquid-glass rounded-full text-sm font-bold text-white flex items-center space-x-2 liquid-glass-hover shadow-lg"
+          className="px-4 py-2 md:px-5 md:py-2.5 liquid-glass rounded-full text-xs md:text-sm font-bold text-white flex items-center space-x-2 liquid-glass-hover shadow-lg"
         >
-          <RefreshCw size={16} className={isRefreshing ? 'animate-spin text-[#FAB515]' : 'text-[#FAB515]'} />
+          <RefreshCw size={14} className={isRefreshing ? 'animate-spin text-[#FAB515]' : 'text-[#FAB515]'} />
           <span>Buscar nesta área</span>
         </button>
       </div>
 
       <div className="absolute bottom-48 right-4 z-[400] flex flex-col space-y-2">
         <button 
-          onClick={() => map?.setZoom((map.getZoom() || 13) + 1)}
-          className="w-12 h-12 liquid-glass rounded-full flex items-center justify-center text-white liquid-glass-hover"
+          onClick={() => setMapZoom(prev => Math.min(prev + 1, 20))}
+          className="w-10 h-10 md:w-12 md:h-12 liquid-glass rounded-full flex items-center justify-center text-white liquid-glass-hover"
         >
-          <Plus size={24} />
+          <Plus size={20} />
         </button>
         <button 
-          onClick={() => map?.setZoom((map.getZoom() || 13) - 1)}
-          className="w-12 h-12 liquid-glass rounded-full flex items-center justify-center text-white liquid-glass-hover"
+          onClick={() => setMapZoom(prev => Math.max(prev - 1, 1))}
+          className="w-10 h-10 md:w-12 md:h-12 liquid-glass rounded-full flex items-center justify-center text-white liquid-glass-hover"
         >
-          <Minus size={24} />
+          <Minus size={20} />
         </button>
       </div>
 
       <button 
         onClick={handleLocate}
-        className="absolute bottom-32 right-4 z-[400] w-12 h-12 liquid-glass rounded-full flex items-center justify-center text-[#FAB515] liquid-glass-hover"
+        className="absolute bottom-32 right-4 z-[400] w-10 h-10 md:w-12 md:h-12 liquid-glass rounded-full flex items-center justify-center text-[#FAB515] liquid-glass-hover"
       >
-        <LocateFixed size={24} />
+        <LocateFixed size={20} />
       </button>
 
       <Map
         center={mapCenter}
-        zoom={13}
+        zoom={mapZoom}
         mapId="bf51a910020fa25a" // Use a dark mode map ID if available
         disableDefaultUI={true}
         className="w-full h-full"
         onCenterChanged={(e) => setMapCenter(e.detail.center)}
+        onZoomChanged={(e) => setMapZoom(e.detail.zoom)}
         gestureHandling="greedy"
       >
         {userLocation && (
