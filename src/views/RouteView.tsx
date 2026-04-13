@@ -138,28 +138,23 @@ export function RouteView({ onStartNavigation }: RouteViewProps) {
       </div>
 
       <div className="h-64 w-full rounded-[2rem] overflow-hidden mb-8 border border-white/10 shadow-[0_16px_40px_rgba(0,0,0,0.8)]">
-        <Map
-          center={mapCenter}
-          zoom={10}
-          mapId="bf51a910020fa25a"
-          disableDefaultUI={true}
-          gestureHandling="greedy"
-        >
-          {route && route.stops.map((stop: any, idx: number) => (
-            <AdvancedMarker key={idx} position={{ lat: stop.lat, lng: stop.lng }}>
-              <div className="w-6 h-6 bg-[#FAB515] rounded-full border-2 border-[#0D518E] shadow-[0_0_15px_rgba(250,181,21,0.8)] flex items-center justify-center">
-                <Zap size={12} className="text-white" />
-              </div>
-            </AdvancedMarker>
-          ))}
-          {route && (
-            <AdvancedMarker position={{ lat: route.finalDestLat, lng: route.finalDestLng }}>
-              <div className="w-8 h-8 bg-red-500 rounded-full border-2 border-white shadow-[0_0_15px_rgba(239,68,68,0.8)] flex items-center justify-center">
-                <MapPin size={16} className="text-white" />
-              </div>
-            </AdvancedMarker>
-          )}
-        </Map>
+        {route ? (
+          <iframe
+            src={`https://embed.waze.com/iframe?zoom=14&lat=${route.finalDestLat}&lon=${route.finalDestLng}&ct=livemap`}
+            width="100%"
+            height="100%"
+            allowFullScreen
+            style={{ border: 0 }}
+          />
+        ) : (
+          <Map
+            center={mapCenter}
+            zoom={10}
+            mapId="bf51a910020fa25a"
+            disableDefaultUI={true}
+            gestureHandling="greedy"
+          />
+        )}
       </div>
 
       <button 
