@@ -82,7 +82,7 @@ export default function App() {
         <div className="relative z-10 flex flex-col h-full w-full">
           {!isNavigating && <Header onProfileClick={() => setActiveTab('profile')} onLogout={handleLogout} onTipsClick={() => setIsTipsModalOpen(true)} />}
           
-          <main className="flex-1 relative">
+          <main className="flex-1 min-h-0 relative overflow-hidden">
             {renderView()}
           </main>
 

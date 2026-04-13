@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { 
   Map, 
   useMap, 
@@ -28,6 +28,8 @@ export function MapView({ isNavigating = false, setIsNavigating }: MapViewProps)
   const [mapZoom, setMapZoom] = useState(13);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
+  const [connectorFilter, setConnectorFilter] = useState('Todos');
+  const [isConnectorMenuOpen, setIsConnectorMenuOpen] = useState(false);
   
   // Navigation Modal State
   const [isNavModalOpen, setIsNavModalOpen] = useState(false);
@@ -40,8 +42,8 @@ export function MapView({ isNavigating = false, setIsNavigating }: MapViewProps)
     const service = new google.maps.places.PlacesService(map);
     const request: google.maps.places.PlaceSearchRequest = {
       location: new google.maps.LatLng(location.lat, location.lng),
-      radius: 5000,
-      type: 'electric_vehicle_charging_station'
+      radius: 50000,
+      keyword: 'eletroposto OR recarga de veículo elétrico OR ev charging'
     };
 
     service.nearbySearch(request, (results, status) => {
@@ -106,7 +108,7 @@ export function MapView({ isNavigating = false, setIsNavigating }: MapViewProps)
     handleLocate();
   }, [placesLib]);
 
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!geocodingLib || !map || !searchQuery) return;
     
@@ -176,22 +178,45 @@ export function MapView({ isNavigating = false, setIsNavigating }: MapViewProps)
         </button>
       </div>
 
-      <div className="absolute top-36 md:top-40 left-4 right-4 z-[400] flex space-x-2 overflow-x-auto pb-2 no-scrollbar">
-        <button className="px-3 py-1.5 md:px-4 md:py-2 liquid-glass rounded-full text-xs md:text-sm font-medium whitespace-nowrap text-white liquid-glass-hover">
-          Todos os Conectores
-        </button>
-        <button className="px-3 py-1.5 md:px-4 md:py-2 liquid-glass rounded-full text-xs md:text-sm font-medium whitespace-nowrap text-white liquid-glass-hover">
-          Potência &gt; 50kW
-        </button>
+      <div className="absolute top-36 md:top-40 left-4 z-[400] flex flex-col space-y-2">
+        <div className="relative">
+          <button
+            onClick={() => setIsConnectorMenuOpen(!isConnectorMenuOpen)}
+            className="px-4 py-2 liquid-glass rounded-full text-sm font-medium whitespace-nowrap text-white liquid-glass-hover shadow-lg flex items-center"
+          >
+            Tipo de Conector: {connectorFilter} <span className="ml-2 text-[10px]">▼</span>
+          </button>
+
+          <AnimatePresence>
+            {isConnectorMenuOpen && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="absolute top-full mt-2 left-0 liquid-glass rounded-xl overflow-hidden shadow-xl min-w-[150px]"
+              >
+                {['Todos', 'CCS2', 'Type 2', 'CHAdeMO', 'Potência > 50kW'].map(type => (
+                  <button
+                    key={type}
+                    onClick={() => { setConnectorFilter(type); setIsConnectorMenuOpen(false); }}
+                    className={`block w-full text-left px-4 py-2 text-sm hover:bg-white/10 ${connectorFilter === type ? 'text-[#FAB515] font-bold' : 'text-white'}`}
+                  >
+                    {type}
+                  </button>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       </div>
 
-      <div className="absolute top-48 md:top-56 left-1/2 -translate-x-1/2 z-[400]">
+      <div className="absolute top-36 md:top-40 right-4 z-[400]">
         <button 
           onClick={handleRefresh}
-          className="px-4 py-2 md:px-5 md:py-2.5 liquid-glass rounded-full text-xs md:text-sm font-bold text-white flex items-center space-x-2 liquid-glass-hover shadow-lg"
+          className="px-4 py-2 liquid-glass rounded-full text-xs md:text-sm font-bold text-white flex items-center space-x-2 liquid-glass-hover shadow-lg"
         >
           <RefreshCw size={14} className={isRefreshing ? 'animate-spin text-[#FAB515]' : 'text-[#FAB515]'} />
-          <span>Buscar nesta área</span>
+          <span className="hidden md:inline">Buscar nesta área</span>
         </button>
       </div>
 

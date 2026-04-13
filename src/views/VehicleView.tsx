@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Car, Battery, Zap, Plus, Trash2, Search, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
