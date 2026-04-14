@@ -17,11 +17,11 @@ export function BottomNav({ activeTab, onChange }: BottomNavProps) {
   ];
 
   return (
-    <div className="fixed bottom-6 left-4 right-4 z-[1000]">
-      <div className="bg-white/10 backdrop-blur-[40px] border border-white/20 rounded-[2rem] shadow-[0_8px_32px_rgba(0,0,0,0.4)] p-2 flex justify-between items-center relative overflow-hidden">
-        {/* Liquid Glass Highlight Effect */}
-        <div className="absolute inset-0 bg-gradient-to-tr from-white/5 to-transparent pointer-events-none"></div>
-        
+    <div className="fixed bottom-4 left-3 right-3 z-[1000]">
+      <div className="liquid-glass-strong rounded-[1.75rem] p-1.5 flex justify-between items-center relative overflow-hidden">
+        {/* Top highlight - Apple glass reflection */}
+        <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/15 to-transparent" />
+
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -34,20 +34,22 @@ export function BottomNav({ activeTab, onChange }: BottomNavProps) {
               {isActive && (
                 <motion.div
                   layoutId="activeTabIndicator"
-                  className="absolute inset-0 bg-white/20 rounded-[1.5rem] shadow-[inset_0_0_20px_rgba(255,255,255,0.1)]"
-                  transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                  className="absolute inset-0 bg-white/12 rounded-[1.25rem] shadow-[inset_0_0_16px_rgba(255,255,255,0.06)]"
+                  transition={{ type: 'spring', bounce: 0.2, duration: 0.5 }}
                 />
               )}
               <motion.div
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
+                whileHover={{ scale: 1.08 }}
+                whileTap={{ scale: 0.92 }}
                 className={cn(
-                  "relative z-10 flex flex-col items-center justify-center transition-colors duration-300",
-                  isActive ? "text-[#FAB515] drop-shadow-[0_0_8px_rgba(250,181,21,0.8)]" : "text-[#b0b0b0] group-hover:text-[#e7e7e7]"
+                  'relative z-10 flex flex-col items-center justify-center transition-colors duration-200',
+                  isActive
+                    ? 'text-[#FAB515] drop-shadow-[0_0_8px_rgba(250,181,21,0.6)]'
+                    : 'text-[#808080] group-hover:text-[#b0b0b0]'
                 )}
               >
-                <Icon size={22} strokeWidth={isActive ? 2.5 : 2} />
-                <span className="text-[10px] font-medium mt-1">{tab.label}</span>
+                <Icon size={21} strokeWidth={isActive ? 2.5 : 1.8} />
+                <span className="text-[10px] font-medium mt-0.5">{tab.label}</span>
               </motion.div>
             </button>
           );

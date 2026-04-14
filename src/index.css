@@ -47,12 +47,45 @@
   display: none;
 }
 
-/* Utilities for iOS 26.4 Liquid Glass */
+/* iOS 26 Liquid Glass Design System */
 @layer utilities {
   .liquid-glass {
-    @apply bg-[#121212]/85 backdrop-blur-2xl border border-white/15 shadow-[0_8px_32px_rgba(0,0,0,0.6)];
+    background: rgba(18, 18, 18, 0.72);
+    -webkit-backdrop-filter: blur(40px) saturate(180%);
+    backdrop-filter: blur(40px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.4),
+      inset 0 0.5px 0 rgba(255, 255, 255, 0.08);
   }
+
+  .liquid-glass-strong {
+    background: rgba(18, 18, 18, 0.82);
+    -webkit-backdrop-filter: blur(60px) saturate(200%);
+    backdrop-filter: blur(60px) saturate(200%);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow:
+      0 12px 40px rgba(0, 0, 0, 0.5),
+      inset 0 0.5px 0 rgba(255, 255, 255, 0.1);
+  }
+
   .liquid-glass-hover {
-    @apply hover:bg-[#1a1a1a]/95 hover:border-white/30 hover:shadow-[0_16px_48px_rgba(0,0,0,0.8)] transition-all duration-300;
+    @apply transition-all duration-300 ease-out;
+  }
+  .liquid-glass-hover:hover {
+    background: rgba(30, 30, 30, 0.85);
+    border-color: rgba(255, 255, 255, 0.2);
+    box-shadow:
+      0 12px 40px rgba(0, 0, 0, 0.5),
+      inset 0 0.5px 0 rgba(255, 255, 255, 0.12);
+    transform: translateY(-0.5px);
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
   }
 }

@@ -90,7 +90,7 @@ export function VehicleView() {
   };
 
   return (
-    <div className="pt-24 px-4 pb-32 h-full overflow-y-auto relative z-10">
+    <div className="pt-[5.5rem] px-4 pb-28 h-full overflow-y-auto relative z-10 no-scrollbar">
       <div className="flex justify-between items-center mb-8">
         <h2 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#e7e7e7] to-[#b0b0b0] tracking-tight drop-shadow-md">Meus Veículos</h2>
         {!isAdding && (

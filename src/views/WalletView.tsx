@@ -34,7 +34,7 @@ export function WalletView() {
   };
 
   return (
-    <div className="pt-24 px-4 pb-32 h-full overflow-y-auto relative z-10">
+    <div className="pt-[5.5rem] px-4 pb-28 h-full overflow-y-auto relative z-10 no-scrollbar">
       <h2 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#e7e7e7] to-[#b0b0b0] mb-8 tracking-tight drop-shadow-md">Carteira</h2>
 
       <div className="liquid-glass rounded-[2rem] p-8 mb-8 text-[#e7e7e7] relative overflow-hidden animate-in fade-in slide-in-from-bottom-4">
