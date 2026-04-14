@@ -38,7 +38,7 @@ export function ProfileView({ user, onLogout }: ProfileViewProps) {
   ];
 
   return (
-    <div className="pt-24 px-4 pb-32 h-full overflow-y-auto relative z-10">
+    <div className="pt-[5.5rem] px-4 pb-28 h-full overflow-y-auto relative z-10 no-scrollbar">
       <div className="flex items-center space-x-5 mb-10 animate-in fade-in slide-in-from-top-4">
         <div className="w-20 h-20 liquid-glass rounded-full flex items-center justify-center overflow-hidden shadow-[0_0_20px_rgba(250,181,21,0.3)]">
           {userData?.photoURL ? (

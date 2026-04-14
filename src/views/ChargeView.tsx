@@ -27,7 +27,7 @@ export function ChargeView() {
 
   if (!session) {
     return (
-      <div className="pt-24 px-4 pb-32 h-full overflow-y-auto relative z-10">
+      <div className="pt-[5.5rem] px-4 pb-28 h-full overflow-y-auto relative z-10 no-scrollbar">
         <h2 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#e7e7e7] to-[#b0b0b0] mb-8 tracking-tight drop-shadow-md">Recarga</h2>
 
         {/* QR Code Scanner Placeholder */}
@@ -92,7 +92,7 @@ export function ChargeView() {
   }
 
   return (
-    <div className="pt-24 px-4 pb-32 h-full overflow-y-auto relative z-10">
+    <div className="pt-[5.5rem] px-4 pb-28 h-full overflow-y-auto relative z-10 no-scrollbar">
       <div className="liquid-glass rounded-[2rem] p-6 mb-6 relative overflow-hidden animate-in fade-in zoom-in-95">
         {/* Animated Background Glow */}
         <div className="absolute -top-20 -right-20 w-64 h-64 bg-[#0D518E]/30 blur-3xl rounded-full pointer-events-none animate-pulse"></div>
